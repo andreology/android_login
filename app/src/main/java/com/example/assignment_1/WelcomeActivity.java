@@ -8,7 +8,7 @@ import android.widget.TextView;
 import org.w3c.dom.Text;
 
 public class WelcomeActivity extends AppCompatActivity {
-
+    private TextView showMessage;
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -17,9 +17,8 @@ public class WelcomeActivity extends AppCompatActivity {
         Intent intent = getIntent();
         String user = intent.getStringExtra("username");
         String pass = intent.getStringExtra("password");
-
-        TextView usernameDisplay = findViewById(R.id.usernameView);
-        usernameDisplay.setText(user);
+        showMessage = findViewById(R.id.usernameView);
+        showMessage.setText("Welcome " + user);
     }
 }
 
