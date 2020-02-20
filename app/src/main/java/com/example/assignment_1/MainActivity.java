@@ -10,24 +10,27 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.util.*;
+
 public class MainActivity extends AppCompatActivity {
 
-    public static final String PREFS_NAME = "UserPrefsFile";
+    // Dictionary of users here:
+    public static Dictionary users = new Hashtable();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Creates a shared file to store data in (i.e. username & password for login verification)
-        SharedPreferences userDate = getSharedPreferences(PREFS_NAME, 0);
-        // userDate.getString
-        final EditText usernameText = findViewById(R.id.usernameField);
-        final EditText passwordTxt = findViewById(R.id.passwordField);
-        Button loginBtn = findViewById(R.id.signUpButton);
-        Button signUpBtn = findViewById(R.id.signUpButton);
 
+//        final EditText usernameText = findViewById(R.id.usernameField);
+//        final EditText passwordTxt = findViewById(R.id.passwordField);
+//        final Button loginBtn = findViewById(R.id.signUpButton);
+//        final Button signUpBtn = findViewById(R.id.signUpButton);
+
+        /*
         loginBtn.setOnClickListener(new View.OnClickListener(){
+            @Override
             public void onClick(View v){
                 // Handler code here:
 
@@ -36,29 +39,52 @@ public class MainActivity extends AppCompatActivity {
                 String password = passwordTxt.getText().toString();
 
                 if (password.length() < 6){
+                    // Toast
                     Toast.makeText(getApplicationContext(), "Longer password required", Toast.LENGTH_SHORT);
                 }
                 else{
                     // Check username and password with Dictionary
+                    if (password.equals(users.get(username))){ // check if the password matches the username's value pair
+                        // if it matches, then go to other activity
+                        Intent welcomeIntent = new Intent(getApplicationContext(), WelcomeActivity.class);
+                        welcomeIntent.putExtra(USER_MESSAGE, username);
+                        welcomeIntent.putExtra(USER_PASSWORD, password);
+                        startActivity(welcomeIntent); // Starts the WelcomeActivity
+                    }
+                    else{
+                        // Toast
+                        Toast.makeText(getApplicationContext(), "Invalid Login", Toast.LENGTH_SHORT);
+                    }
 
-                    // if it matches, then go to other activity
-                    Intent intent = new Intent(getApplicationContext(), WelcomeActivity.class);
-                    intent.putExtra("username", username);
-                    intent.putExtra("password", password);
-                    startActivity(intent); // Starts the WelcomeActivity
                 }
 
             }
         });
 
         signUpBtn.setOnClickListener(new View.OnClickListener(){
+            @Override
             public void onClick(View v){
                 // Handler code here:
                 // Go to sign up activity page
-                Intent intent = new Intent(getApplicationContext(), SignUpActivity.class);
-                startActivity(intent);
+                Intent signUpIntent = new Intent(getApplicationContext(), SignUpActivity.class);
+                startActivity(signUpIntent);
             }
-        });
+        });*/
 
+    }
+    public void sendMessage(View view){
+        EditText user = (EditText) findViewById(R.id.usernameField);
+        String message = user.getText().toString();
+
+        // Username/password validation
+
+        Intent welcomeIntent = new Intent(this, WelcomeActivity.class);
+        welcomeIntent.putExtra("USERNAME", message);
+        startActivity(welcomeIntent);
+    }
+
+    public void openSignUp(View view){
+        Intent signUpIntent = new Intent(this, SignUpActivity.class);
+        startActivity(signUpIntent);
     }
 }

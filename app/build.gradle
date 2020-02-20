@@ -17,6 +17,14 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    flavorDimensions 'dim1'
+    productFlavors {
+        Marsh {
+            dimension = 'dim1'
+            targetSdkVersion 23
+            minSdkVersion 23
+        }
+    }
 }
 
 dependencies {
