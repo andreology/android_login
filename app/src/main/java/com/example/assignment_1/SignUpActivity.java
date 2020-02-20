@@ -68,6 +68,8 @@ public class SignUpActivity extends AppCompatActivity {
         String regexForCell = "^\\(?([0-9]{3})\\)?[-.\\s]?([0-9]{3})[-.\\s]?([0-9]{4})$";
         Pattern patternForCell = Pattern.compile(regexForCell);
         Matcher matcherForCell = patternForCell.matcher(cellPhoneInput);
+        Log.w(TAG, "Checking regex for email " + matcherForEmail.matches());
+        Log.w(TAG, "Checking regex for cell " + matcherForCell.matches());
 
         //------------Assignment 1 requirements, 2bi. All fields must be filled----------------
         if (TextUtils.isEmpty(userNameInput)){
@@ -87,13 +89,16 @@ public class SignUpActivity extends AppCompatActivity {
             isValid = false;
 
             //-----------Assignment 1 requirements, 2biii. Password and retype password must be the same----------------
-        }else if(passwordInput != passwordInput0) {
+        }else if(passwordInput.compareTo(passwordInput0) !=0) {
+            userPassword.setError("Passwords must match");
             isValid = false;
             //-----------Assignment 1 requirements, 2biv. email must be in correct format----------------
         }else if(!matcherForEmail.matches()) {
+            userEmail.setError("Email Must be in correct format.");
             isValid = false;
             //-----------Assignment 1 requirements, 2biv. phone must be in correct format----------------
         }else if(!matcherForCell.matches()) {
+            userCellPhone.setError("Cell Must be in correct format.");
             isValid = false;
         }
         return isValid;
