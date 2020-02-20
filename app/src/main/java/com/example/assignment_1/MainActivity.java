@@ -73,14 +73,30 @@ public class MainActivity extends AppCompatActivity {
 
     }
     public void sendMessage(View view){
-        EditText user = (EditText) findViewById(R.id.usernameField);
-        String message = user.getText().toString();
+        EditText user = findViewById(R.id.usernameField);
+        EditText pass = findViewById(R.id.passwordField);
+        String username = user.getText().toString();
+        String password = pass.getText().toString();
 
-        // Username/password validation
+        // Username/password completion validation
+        if (password.length() < 1 && username.length() < 1){
+            Toast completeToast = Toast.makeText(getApplicationContext(), "Please complete all fields", Toast.LENGTH_LONG);
+            completeToast.show();
+        }
+        else{ // If they complete both fields, validate with dictionary
+            if (username.equals(password)){ // If it matches a dictionary entry, temp test right now
+                Intent welcomeIntent = new Intent(this, WelcomeActivity.class);
+                welcomeIntent.putExtra("USERNAME", username);
+                startActivity(welcomeIntent);
+            }
+            else{
+                Toast invalidToast = Toast.makeText(getApplicationContext(), "Invalid login credentials", Toast.LENGTH_LONG);
+                invalidToast.show();
+                pass.setText(null);
+            }
 
-        Intent welcomeIntent = new Intent(this, WelcomeActivity.class);
-        welcomeIntent.putExtra("USERNAME", message);
-        startActivity(welcomeIntent);
+        }
+
     }
 
     public void openSignUp(View view){
