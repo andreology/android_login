@@ -64,7 +64,7 @@ public class SignUpActivity extends AppCompatActivity {
         String regexForEmails = "^[A-Za-z0-9+_.-]+@(.+)$";
         Pattern patternForEmail = Pattern.compile(regexForEmails);
         Matcher matcherForEmail = patternForEmail.matcher(emailInput);
-        //-----------Email REGEX---------------
+        //-----------cell phone U.S. REGEX---------------
         String regexForCell = "^\\(?([0-9]{3})\\)?[-.\\s]?([0-9]{3})[-.\\s]?([0-9]{4})$";
         Pattern patternForCell = Pattern.compile(regexForCell);
         Matcher matcherForCell = patternForEmail.matcher(cellPhoneInput);
