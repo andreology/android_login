@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.content.Intent;
 import android.widget.Toast;
 import android.text.TextUtils;
 import android.util.Log;
@@ -54,6 +55,10 @@ public class SignUpActivity extends AppCompatActivity {
     private void attemptSignUp(String userNameInput, String passwordInput,String passwordInput0,String emailInput,String cellPhoneInput) {
         //---------validate form-------------------
         if(!validateAllInputs(userNameInput, passwordInput, passwordInput0, emailInput, cellPhoneInput)) { return; }
+        else {
+            Intent i = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(i);
+        }
     }
 
     //-------------Project validation requirements--------------------------
