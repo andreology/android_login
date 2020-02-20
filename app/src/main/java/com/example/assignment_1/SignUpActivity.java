@@ -7,7 +7,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 import android.text.TextUtils;
 import android.util.Log;
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -35,7 +36,7 @@ public class SignUpActivity extends AppCompatActivity {
         userCellPhone = findViewById(R.id.phoneField);
 
         //----------Setting up listener for sign up button, collect input----------------
-        /*signUpButton.setOnClickListener(new View.OnClickListener() {
+        signUpButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 String userNameInput = userName.getText().toString();
                 String passwordInput = userPassword.getText().toString();
@@ -46,7 +47,7 @@ public class SignUpActivity extends AppCompatActivity {
                 //------------call sign up method--------------
                 attemptSignUp(userNameInput, passwordInput, passwordInput0, emailInput, cellPhoneInput);
             }
-        });*/
+        });
     }
 
     //------------Sign up logic---------------------
@@ -58,6 +59,15 @@ public class SignUpActivity extends AppCompatActivity {
     //-------------Project validation requirements--------------------------
     private boolean validateAllInputs(String userNameInput, String passwordInput,String passwordInput0,String emailInput,String cellPhoneInput) {
         boolean isValid = true;
+        //-----------Java util library for regex--------------
+        //-----------Email REGEX---------------
+        String regexForEmails = "^[A-Za-z0-9+_.-]+@(.+)$";
+        Pattern patternForEmail = Pattern.compile(regexForEmails);
+        Matcher matcherForEmail = patternForEmail.matcher(emailInput);
+        //-----------cell phone U.S. REGEX---------------
+        String regexForCell = "^\\(?([0-9]{3})\\)?[-.\\s]?([0-9]{3})[-.\\s]?([0-9]{4})$";
+        Pattern patternForCell = Pattern.compile(regexForCell);
+        Matcher matcherForCell = patternForCell.matcher(cellPhoneInput);
 
         //------------Assignment 1 requirements, 2bi. All fields must be filled----------------
         if (TextUtils.isEmpty(userNameInput)){
@@ -75,27 +85,17 @@ public class SignUpActivity extends AppCompatActivity {
         }else if(TextUtils.isEmpty(cellPhoneInput)){
             userCellPhone.setError("All Fields Are Required.");
             isValid = false;
+
+            //-----------Assignment 1 requirements, 2biii. Password and retype password must be the same----------------
+        }else if(passwordInput != passwordInput0) {
+            isValid = false;
+            //-----------Assignment 1 requirements, 2biv. email must be in correct format----------------
+        }else if(!matcherForEmail.matches()) {
+            isValid = false;
+            //-----------Assignment 1 requirements, 2biv. phone must be in correct format----------------
+        }else if(!matcherForCell.matches()) {
+            isValid = false;
         }
-
-        //-----------
-
-<<<<<<< HEAD
         return isValid;
-=======
-
-
-        return isValid;
-    }
-
-    public void signUp(View v) {
-        String userNameInput = userName.getText().toString();
-        String passwordInput = userPassword.getText().toString();
-        String passwordInput0 = userPassword0.getText().toString();
-        String emailInput = userEmail.getText().toString();
-        String cellPhoneInput = userCellPhone.getText().toString();
-
-        //------------call sign up method--------------
-        attemptSignUp(userNameInput, passwordInput, passwordInput0, emailInput, cellPhoneInput);
->>>>>>> 5ecf3e8014024378b8e5ee51ceecbabe3c746221
     }
 }

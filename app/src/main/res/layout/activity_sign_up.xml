@@ -85,7 +85,6 @@
             android:id="@+id/signUpButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="signUp"
             android:text="Sign Up"
             tools:layout_conversion_absoluteHeight="55dp"
             tools:layout_conversion_absoluteWidth="291dp"
