@@ -82,17 +82,24 @@
             tools:layout_editor_absoluteX="0dp"
             tools:layout_editor_absoluteY="752dp" />
 
-        <Button
-            android:id="@+id/signUpButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="returnLogin"
-            android:text="Sign Up"
-            android:textAlignment="center"
-            tools:layout_conversion_absoluteHeight="55dp"
-            tools:layout_conversion_absoluteWidth="291dp"
-            tools:layout_editor_absoluteX="0dp"
-            tools:layout_editor_absoluteY="852dp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/signUpButton"
+                android:layout_width="167dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="125dp"
+                android:layout_marginTop="40dp"
+                android:text="Sign Up"
+                android:textAlignment="center"
+                tools:layout_conversion_absoluteHeight="55dp"
+                tools:layout_conversion_absoluteWidth="291dp"
+                tools:layout_editor_absoluteX="0dp"
+                tools:layout_editor_absoluteY="852dp" />
+        </LinearLayout>
 
     </LinearLayout>
 
