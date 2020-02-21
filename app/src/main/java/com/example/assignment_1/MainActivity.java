@@ -56,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void openSignUp(View view){
         Intent signUpIntent = new Intent(this, SignUpActivity.class);
+        signUpIntent.putExtra("users", this.users);
         startActivity(signUpIntent);
     }
 
