@@ -27,6 +27,7 @@
             android:layout_height="50dp"
             android:ems="10"
             android:hint="Username"
+            android:textAlignment="textStart"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -85,7 +86,9 @@
             android:id="@+id/signUpButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:onClick="returnLogin"
             android:text="Sign Up"
+            android:textAlignment="center"
             tools:layout_conversion_absoluteHeight="55dp"
             tools:layout_conversion_absoluteWidth="291dp"
             tools:layout_editor_absoluteX="0dp"

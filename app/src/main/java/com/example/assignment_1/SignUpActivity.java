@@ -1,5 +1,8 @@
 package com.example.assignment_1;
 
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -7,57 +10,39 @@ import android.widget.EditText;
 import android.widget.Toast;
 import android.text.TextUtils;
 import android.util.Log;
+
+import java.io.Serializable;
+import java.util.Dictionary;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-import androidx.appcompat.app.AppCompatActivity;
-
 public class SignUpActivity extends AppCompatActivity {
     private static final String TAG = "Sign Up";
-    private Button signUpButton;
-    private EditText userName;
-    private EditText userPassword;
-    private EditText userPassword0;
-    private EditText userEmail;
-    private EditText userCellPhone;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
-
-        //assigning elements to variables
-        signUpButton = findViewById(R.id.signUpButton);
-        userName = findViewById(R.id.usernameField);
-        userPassword = findViewById(R.id.passwordField);
-        userPassword0 = findViewById(R.id.passwordField2);
-        userEmail = findViewById(R.id.emailField);
-        userCellPhone = findViewById(R.id.phoneField);
-
-        //----------Setting up listener for sign up button, collect input----------------
-        signUpButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                String userNameInput = userName.getText().toString();
-                String passwordInput = userPassword.getText().toString();
-                String passwordInput0 = userPassword0.getText().toString();
-                String emailInput = userEmail.getText().toString();
-                String cellPhoneInput = userCellPhone.getText().toString();
-
-                //------------call sign up method--------------
-                attemptSignUp(userNameInput, passwordInput, passwordInput0, emailInput, cellPhoneInput);
-            }
-        });
     }
 
     //------------Sign up logic---------------------
     private void attemptSignUp(String userNameInput, String passwordInput,String passwordInput0,String emailInput,String cellPhoneInput) {
         //---------validate form-------------------
-        if(!validateAllInputs(userNameInput, passwordInput, passwordInput0, emailInput, cellPhoneInput)) { return; }
+        if(!validateAllInputs(userNameInput, passwordInput, passwordInput0, emailInput, cellPhoneInput)) {
+            return;
+        }
     }
 
     //-------------Project validation requirements--------------------------
     private boolean validateAllInputs(String userNameInput, String passwordInput,String passwordInput0,String emailInput,String cellPhoneInput) {
+        EditText userName = findViewById(R.id.usernameField);
+        EditText userPassword = findViewById(R.id.passwordField);
+        EditText userPassword0 = findViewById(R.id.passwordField2);
+        EditText userEmail = findViewById(R.id.emailField);
+        EditText userCellPhone = findViewById(R.id.phoneField);
+
         boolean isValid = true;
         //-----------Java util library for regex--------------
         //-----------Email REGEX---------------
@@ -102,5 +87,40 @@ public class SignUpActivity extends AppCompatActivity {
             isValid = false;
         }
         return isValid;
+    }
+
+    public void returnLogin(View view){
+        EditText userName = findViewById(R.id.usernameField);
+        EditText userPassword = findViewById(R.id.passwordField);
+        EditText userPassword0 = findViewById(R.id.passwordField2);
+        EditText userEmail = findViewById(R.id.emailField);
+        EditText userCellPhone = findViewById(R.id.phoneField);
+
+        String userNameInput = userName.getText().toString();
+        String passwordInput = userPassword.getText().toString();
+        String passwordInput0 = userPassword0.getText().toString();
+        String emailInput = userEmail.getText().toString();
+        String cellPhoneInput = userCellPhone.getText().toString();
+
+        //------------call sign up method--------------
+        attemptSignUp(userNameInput, passwordInput, passwordInput0, emailInput, cellPhoneInput);
+
+
+        EditText user = findViewById(R.id.usernameField);
+        EditText pass1 = findViewById(R.id.passwordField);
+        EditText pass2 = findViewById(R.id.passwordField2);
+
+        String username = user.getText().toString();
+        String password1 = pass1.getText().toString();
+        String password2 = pass2.getText().toString();
+
+        // Input validation
+        if (password1.equals(password2)){
+            // Write new entry to dictionary
+            MainActivity.users.put(username, password1);
+
+            Intent loginIntent = new Intent(this, MainActivity.class);
+            startActivity(loginIntent);
+        }
     }
 }
