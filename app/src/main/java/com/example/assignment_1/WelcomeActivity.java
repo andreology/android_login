@@ -2,9 +2,13 @@ package com.example.assignment_1;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class WelcomeActivity extends AppCompatActivity {
 
@@ -18,6 +22,9 @@ public class WelcomeActivity extends AppCompatActivity {
 
         TextView usernameDisplay = findViewById(R.id.usernameDisplay);
         usernameDisplay.setText("Welcome " + username + "!");
+
+
+
     }
 }
 
