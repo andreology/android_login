@@ -18,6 +18,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.SimpleAdapter;
@@ -43,7 +45,7 @@ import java.util.List;
  * item details. On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
  */
-public class carListActivity extends AppCompatActivity {
+public class carListActivity extends AppCompatActivity implements OnItemSelectedListener {
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -58,7 +60,13 @@ public class carListActivity extends AppCompatActivity {
     // URL to get car makes in JSON
     private static String url = "https://thawing-beach-68207.herokuapp.com/carmakes";
     String[] testMakes = {"Tesla", "Lambo", "Ferrari"};
-    String[] testModels = {"Model X", "Model S", "Roadster"};
+    String[] testModels1 = {"Model X", "Model S", "Roadster"};
+    String[] testModels2 = {"Aventador", "Urus"};
+    String[] testModels3 = {"F50", "Ferrari Coupe"};
+    ArrayAdapter<String> spinnerAdapter2;
+    Spinner modelSpinner;
+    // to avoid duplicate calls
+    private Boolean executeOnItemSelected = false;
 
 
     @Override
@@ -67,18 +75,27 @@ public class carListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_car_list);
 
         // Creating the spinners and loading them with data
-        Spinner makeSpinner = findViewById(R.id.makeSpinner);
+        Spinner makeSpinner = (Spinner) findViewById(R.id.makeSpinner);
+        // Setting the onItemSelectedListener
         ArrayAdapter<String> spinnerAdapter1 = new ArrayAdapter<String>(carListActivity.this,
                 android.R.layout.simple_list_item_1, testMakes);
         spinnerAdapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         makeSpinner.setAdapter(spinnerAdapter1);
+        makeSpinner.setSelected(false);
+        makeSpinner.setSelection(0, true);
+        makeSpinner.setOnItemSelectedListener(this);
+
 
         // Loading the model spinner
-        Spinner modelSpinner = findViewById(R.id.modelSpinner);
-        ArrayAdapter<String> spinnerAdapter2 = new ArrayAdapter<String>(carListActivity.this,
-                android.R.layout.simple_list_item_1, testModels);
+        modelSpinner = (Spinner) findViewById(R.id.modelSpinner);
+       ArrayAdapter<String> spinnerAdapter2 = new ArrayAdapter<String>(carListActivity.this,
+                    android.R.layout.simple_list_item_1, testModels1);
         spinnerAdapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         modelSpinner.setAdapter(spinnerAdapter2);
+        modelSpinner.setSelected(false);
+        modelSpinner.setSelection(0, true);
+        modelSpinner.setOnItemSelectedListener(this);
+
 
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -109,6 +126,42 @@ public class carListActivity extends AppCompatActivity {
         assert recyclerView != null;
         setupRecyclerView((RecyclerView) recyclerView);
         new GetData().execute();
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+        // Update the model spinner based on the make spinner
+        // Retrieving item selected:
+        if (executeOnItemSelected){
+            String result = adapterView.getItemAtPosition(i).toString().trim();
+            System.out.println("RESULT: " + result);
+            Toast.makeText(adapterView.getContext(), "Selected: " + result, Toast.LENGTH_SHORT).show();
+            if (result.equals("Tesla")){
+                //spinnerAdapter2.clear();
+                spinnerAdapter2 = new ArrayAdapter<String>(carListActivity.this,
+                        android.R.layout.simple_list_item_1, testModels1);
+                //spinnerAdapter2.addAll(testModels1);
+            }
+            else if(result.equals("Lambo")){
+                spinnerAdapter2 = new ArrayAdapter<String>(carListActivity.this,
+                        android.R.layout.simple_list_item_1, testModels2);
+            }
+            else{
+                spinnerAdapter2 = new ArrayAdapter<String>(carListActivity.this,
+                        android.R.layout.simple_list_item_1, testModels3);
+            }
+            spinnerAdapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            modelSpinner.setAdapter(spinnerAdapter2);
+        }
+        else{
+            executeOnItemSelected = true;
+        }
+
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> adapterView) {
+        // Do nothing
     }
 
     /**
