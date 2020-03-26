@@ -2,6 +2,9 @@
     <string name="app_name">assignment_1</string>
     <string name="title_car_list">cars</string>
     <string name="title_car_detail">car Detail</string>
+    <string name="make">Make - Model</string>
+    <string name="last">Last update: </string>
+    <string name="price">Price</string>
     <string-array name="testMakes">
         <item>Tesla</item>
         <item>Ferrari</item>

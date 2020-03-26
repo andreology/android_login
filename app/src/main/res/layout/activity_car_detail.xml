@@ -38,7 +38,7 @@
     <androidx.core.widget.NestedScrollView
         android:id="@+id/car_detail_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="738dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -50,5 +50,7 @@
         app:layout_anchor="@+id/car_detail_container"
         app:layout_anchorGravity="top|end"
         app:srcCompat="@android:drawable/stat_notify_chat" />
+
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
