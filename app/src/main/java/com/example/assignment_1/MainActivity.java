@@ -40,9 +40,9 @@ public class MainActivity extends AppCompatActivity {
         else{ // If they complete both fields, validate with dictionary
 
             if (users.containsKey(username) && users.get(username).equals(password)){ // If it matches a dictionary entry, temp test right now
-                Intent welcomeIntent = new Intent(this, carListActivity.class);
-                welcomeIntent.putExtra("USERNAME", username);
-                startActivity(welcomeIntent);
+                Intent carListIntent = new Intent(this, carListActivity.class);
+                carListIntent.putExtra("USERNAME", username);
+                startActivity(carListIntent);
             }
             else{
                 Toast invalidToast = Toast.makeText(getApplicationContext(), "Invalid login credentials", Toast.LENGTH_LONG);

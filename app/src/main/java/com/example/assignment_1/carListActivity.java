@@ -65,8 +65,10 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
     String[] testModels3 = {"F50", "Ferrari Coupe"};
     ArrayAdapter<String> spinnerAdapter2;
     Spinner modelSpinner;
-    // to avoid duplicate calls
-    private Boolean executeOnItemSelected = false;
+    // to avoid duplicate calls, see if user or program changed the spinner from previous position
+    private int lastSpinnerPositionMake = 0;
+    private int lastSpinnerPositionModel = 0;
+
 
 
     @Override
@@ -128,36 +130,65 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
         new GetData().execute();
     }
 
+    /**
+     * Handles the logic for when a spinner is used to select a value
+     * @param adapterView
+     * @param view
+     * @param i
+     * @param l
+     */
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
         // Update the model spinner based on the make spinner
-        // Retrieving item selected:
-        if (executeOnItemSelected){
-            String result = adapterView.getItemAtPosition(i).toString().trim();
-            System.out.println("RESULT: " + result);
-            Toast.makeText(adapterView.getContext(), "Selected: " + result, Toast.LENGTH_SHORT).show();
-            if (result.equals("Tesla")){
-                //spinnerAdapter2.clear();
-                spinnerAdapter2 = new ArrayAdapter<String>(carListActivity.this,
-                        android.R.layout.simple_list_item_1, testModels1);
-                //spinnerAdapter2.addAll(testModels1);
-            }
-            else if(result.equals("Lambo")){
-                spinnerAdapter2 = new ArrayAdapter<String>(carListActivity.this,
-                        android.R.layout.simple_list_item_1, testModels2);
+        // If the spinner has changed it's answer:
+        int id = adapterView.getId();
+        // Checking if it's the first (make) spinner
+        if (id == R.id.makeSpinner){
+            if (lastSpinnerPositionMake != i) {
+                lastSpinnerPositionMake = i;
             }
             else{
-                spinnerAdapter2 = new ArrayAdapter<String>(carListActivity.this,
-                        android.R.layout.simple_list_item_1, testModels3);
+                // Do nothing if the spinner result hasn't changed
+                return;
+            }
+            // Put our case switching logic in here:
+            String result = adapterView.getItemAtPosition(i).toString().trim();
+            System.out.println("RESULT of Spinner 1: " + result);
+            Toast.makeText(adapterView.getContext(), "Selected: " + result, Toast.LENGTH_SHORT).show();
+            /*Depending on the result of the first spinner, updates the contents of the second
+            spinner to the models available of the make chosen (e.g. if Tesla is chosen in the
+            first spinner, Model X and Model S will be options in the second spinner*/
+            // TODO: Update these to the API values
+            switch(result){
+                case "Tesla":
+                    spinnerAdapter2 = new ArrayAdapter<String>(carListActivity.this,
+                            android.R.layout.simple_list_item_1, testModels1);
+                    break;
+                case "Lambo":
+                    spinnerAdapter2 = new ArrayAdapter<String>(carListActivity.this,
+                            android.R.layout.simple_list_item_1, testModels2);
+                    break;
+                case "Ferrari":
+                    spinnerAdapter2 = new ArrayAdapter<String>(carListActivity.this,
+                            android.R.layout.simple_list_item_1, testModels3);
+                    break;
+
             }
             spinnerAdapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             modelSpinner.setAdapter(spinnerAdapter2);
         }
+        // else it will be the second (model) spinner
         else{
-            executeOnItemSelected = true;
+            String result = adapterView.getItemAtPosition(i).toString().trim();
+            System.out.println("RESULT of Spinner 2: " + result);
+            // Then show the available results in the recyclerview based on the selected make/model
+
         }
 
     }
+
+
+
 
     @Override
     public void onNothingSelected(AdapterView<?> adapterView) {

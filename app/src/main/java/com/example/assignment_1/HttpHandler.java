@@ -11,6 +11,9 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 
+/**
+ * Class that handles the retrieval of data from the API (website) in JSON form
+ */
 public class HttpHandler {
 
     private static final String TAG = HttpHandler.class.getSimpleName();
