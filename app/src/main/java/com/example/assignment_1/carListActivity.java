@@ -61,9 +61,9 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
     private String[] arrMakes;
     private String[] arrModels;
 
-    // These will be set by the results of the spinners
-    private String carMakeNum;
-    private String carModelNum;
+    // These will be set by the results of the spinners, default is first to show
+    private String carMakeNum = "10";
+    private String carModelNum = "21";
 
     private ProgressDialog pDialog;
     // URL to get all of the car makes in JSON
@@ -169,6 +169,7 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
             String result = adapterView.getItemAtPosition(i).toString().trim();
             System.out.println("RESULT of Spinner 1: " + result);
             lastSpinnerMake = result;
+            lastSpinnerPositionModel = 0;
             Toast.makeText(adapterView.getContext(), "Selected: " + result, Toast.LENGTH_SHORT).show();
             /*Depending on the result of the first spinner, updates the contents of the second
             spinner to the models available of the make chosen (e.g. if Tesla is chosen in the
@@ -220,13 +221,13 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
         }
         // Update the carMakeNum and carModelNum for URL:
         for (HashMap m : carMakeList){
-            if (m.get("make").equals(lastSpinnerMake)){
+            if (m.get("make").toString().equals(lastSpinnerMake)){
                 carMakeNum = m.get("id").toString();
                 break;
             }
         }
         for (HashMap n : carModelList){
-            if (n.get("model").equals(lastSpinnerModel)){
+            if (n.get("model").toString().equals(lastSpinnerModel)){
                 carModelNum = n.get("id").toString();
                 break;
             }
@@ -508,16 +509,18 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
             carUrl = carUrl.replaceFirst(" ", carModelNum);
             // appending the id to call the correct url
             String jsonStrMake = sh.makeServicesCall(carUrl);
+            System.out.println("CAR URL: " + carUrl);
 
             Log.e(TAG, "Response from url: " + jsonStrMake);
-            String newStr = jsonStrMake.substring(9, jsonStrMake.length() - 1);
-            System.out.println("Edited json:" + newStr);
+            String test = jsonStrMake.replaceAll("/", ".");
+
 
 
             // If we get a response from the url
             if (jsonStrMake != null){
                 try{
-                    JSONArray cars = new JSONArray(newStr);
+                    JSONObject lists = new JSONObject(test);
+                    JSONArray cars = (JSONArray) lists.get("lists");
 
 
                     // Looping through each model
