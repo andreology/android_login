@@ -53,7 +53,7 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
     // (id:4, model:Roadster, makeID:3), (id:5, model:Model X, makeID:3)
     private ArrayList<HashMap<String, String>> carModelList;
     // This will hold the data for the specific make/model retrieved
-    private ArrayList<HashMap<String, String>> carInfoList;
+    public static ArrayList<HashMap<String, String>> carInfoList;
 
     private ArrayList<String> makeList;
     // Will hold model name & make ID#
@@ -149,7 +149,7 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
         // If the spinner has changed it's answer:
         int id = adapterView.getId();
         // Checking if it's the first (make) spinner
-        if (id == R.id.makeSpinner){ // TODO: HANGING HERE in search on make
+        if (id == R.id.makeSpinner){
             // Check if the spinner value has been updated, proceed if it has, else return
             if (lastSpinnerPositionMake != i) {
                 lastSpinnerPositionMake = i;
@@ -620,7 +620,10 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
             @Override
             public void onClick(View view) {
                 //DummyContent.DummyItem item = (DummyContent.DummyItem) view.getTag();
-                ArrayList<HashMap<String, String>> item = (ArrayList<HashMap<String, String>>) view.getTag();
+                String dataItem = view.getTag().toString();
+                System.out.println("VIEW TAG : " + dataItem);
+                HashMap<String, String> item = (HashMap<String, String>) view.getTag();
+
                 if (mTwoPane) {
                     Bundle arguments = new Bundle();
                     // ???
