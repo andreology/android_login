@@ -12,7 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.example.assignment_1.dummy.DummyContent;
+import com.example.assignment_1.DummyContent;
 
 /**
  * A fragment representing a single car detail screen.

@@ -11,9 +11,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,15 +22,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.assignment_1.dummy.DummyContent;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * An activity representing a list of cars. This activity
@@ -52,29 +46,46 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
     private boolean mTwoPane;
 
     private String TAG = carListActivity.class.getSimpleName();
-    Spinner makeSpinner;
+    private Spinner makeSpinner;
     // Will hold id & car make
-    ArrayList<HashMap<String, String>> carMakeList;
+    private ArrayList<HashMap<String, String>> carMakeList;
     // Will hold vehicle make id, then model id (unique) & model name
     // (id:4, model:Roadster, makeID:3), (id:5, model:Model X, makeID:3)
-    ArrayList<HashMap<String, String>> carModelList;
-    ArrayList<String> makeList;
+    private ArrayList<HashMap<String, String>> carModelList;
+    // This will hold the data for the specific make/model retrieved
+    private ArrayList<HashMap<String, String>> carInfoList;
+
+    private ArrayList<String> makeList;
     // Will hold model name & make ID#
-    ArrayList<String> modelList;
-    String[] arrMakes;
-    String[] arrModels;
+    private ArrayList<String> modelList;
+    private String[] arrMakes;
+    private String[] arrModels;
+
+    // These will be set by the results of the spinners
+    private String carMakeNum;
+    private String carModelNum;
 
     private ProgressDialog pDialog;
     // URL to get all of the car makes in JSON
     private static String makeUrl = "https://thawing-beach-68207.herokuapp.com/carmakes";
     // Base URL, append the id to end to retrieve models of that particular make (e.g. 3 for Tesla)
     private static String modelUrl = "https://thawing-beach-68207.herokuapp.com/carmodelmakes/";
+    // Base URL
+    private static String carUrl = "https://thawing-beach-68207.herokuapp.com/cars/ / /92603";
     private ArrayAdapter<String> spinnerAdapter2;
     private Spinner modelSpinner;
     // to avoid duplicate calls, see if user or program changed the spinner from previous position
     private int lastSpinnerPositionMake = 0;
     private int lastSpinnerPositionModel = 0;
+    // Stores the results of the spinners for the car detail call
+    private String lastSpinnerMake;
+    private String lastSpinnerModel;
     private String makeID;
+
+    public ArrayList<HashMap<String, String>> getCarInfoList(){
+        return carInfoList;
+    }
+
 
 
 
@@ -82,6 +93,7 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
     protected void onCreate(Bundle savedInstanceState) {
         carMakeList = new ArrayList<>();
         carModelList = new ArrayList<>();
+        carInfoList = new ArrayList<>();
         makeList = new ArrayList<>();
         modelList = new ArrayList<>();
         new GetMakeData().execute();
@@ -126,6 +138,7 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
 
         View recyclerView = findViewById(R.id.car_list);
         assert recyclerView != null;
+        // This is done after the post execute of the third async task
         setupRecyclerView((RecyclerView) recyclerView);
 
     }
@@ -155,6 +168,7 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
             // Put our case switching logic in here:
             String result = adapterView.getItemAtPosition(i).toString().trim();
             System.out.println("RESULT of Spinner 1: " + result);
+            lastSpinnerMake = result;
             Toast.makeText(adapterView.getContext(), "Selected: " + result, Toast.LENGTH_SHORT).show();
             /*Depending on the result of the first spinner, updates the contents of the second
             spinner to the models available of the make chosen (e.g. if Tesla is chosen in the
@@ -192,10 +206,37 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
         }
         // else it will be the second (model) spinner
         else{
+            if (lastSpinnerPositionModel != i) {
+                lastSpinnerPositionModel = i;
+            }
+            else{
+                // Do nothing if the spinner result hasn't changed
+                return;
+            }
             String result = adapterView.getItemAtPosition(i).toString().trim();
             System.out.println("RESULT of Spinner 2: " + result);
-            // Then show the available results in the recyclerview based on the selected make/model
+            lastSpinnerModel = result;
+
         }
+        // Update the carMakeNum and carModelNum for URL:
+        for (HashMap m : carMakeList){
+            if (m.get("make").equals(lastSpinnerMake)){
+                carMakeNum = m.get("id").toString();
+                break;
+            }
+        }
+        for (HashMap n : carModelList){
+            if (n.get("model").equals(lastSpinnerModel)){
+                carModelNum = n.get("id").toString();
+                break;
+            }
+        }
+        // On any change of spinner, need to get the new car data
+        // Then show the available results in the recyclerview based on the selected make/model
+        new GetCarData().execute();
+        View recyclerView = findViewById(R.id.car_list);
+        assert recyclerView != null;
+        setupRecyclerView((RecyclerView) recyclerView);
     }
 
     @Override
@@ -215,7 +256,7 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
             super.onPreExecute();
             // Showing progress dialog
             pDialog = new ProgressDialog(carListActivity.this);
-            pDialog.setMessage("Please wait...");
+            pDialog.setMessage("Fetching manufacturer data...");
             pDialog.setCancelable(false);
             pDialog.show();
         }
@@ -314,6 +355,7 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
         }
 
     }
+
     /**
      * Async task class to get json by making HTTP call
      * This gets the models of all available makes
@@ -326,7 +368,7 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
             super.onPreExecute();
             // Showing progress dialog
             pDialog = new ProgressDialog(carListActivity.this);
-            pDialog.setMessage("Please wait...");
+            pDialog.setMessage("Fetching model data...");
             pDialog.setCancelable(false);
             pDialog.show();
         }
@@ -349,12 +391,6 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
                     try{
                         // Getting JSON Array node
                         JSONArray carModels = new JSONArray(jsonStrMake);
-
-                        // entry holds all of the models for a single make (e.g. all models of tesla)
-                        HashMap<String, ArrayList<HashMap<String, String>>> entry = new HashMap<>();
-                        // Creating a tempArray to fill with models, then add all models for a certain make
-                        ArrayList tempArr = new ArrayList<HashMap<String, String>>();
-
 
                         // Looping through each model
                         for (int i = 0; i < carModels.length(); i++) {
@@ -411,6 +447,7 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
                 pDialog.dismiss();
             }
 
+            // Initialization for first load:
             for (HashMap m : carMakeList){
                 if (m.get("make").toString().equals("Aston Martin")){
                     makeID = m.get("id").toString();
@@ -418,7 +455,6 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
             }
             // Iterating through the models to get all models with the matched makeID
             for (HashMap a : carModelList){
-                // Replace the 3 with tesla.key & get it out of switch
                 if (a.get("makeID").toString().equals(makeID)){
                     modelList.add(a.get("model").toString());
                 }
@@ -431,7 +467,10 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
                 arrModels[j] = s;
                 j++;
             }
-
+            // Need initialization of the recyclerView
+            View recyclerView = findViewById(R.id.car_list);
+            assert recyclerView != null;
+            setupRecyclerView((RecyclerView) recyclerView);
 
             // Setting the spinner data for the models
             ArrayAdapter<String> spinnerAdapter2 = new ArrayAdapter<String>(carListActivity.this,
@@ -442,23 +481,134 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
 
     }
 
+    /**
+     * Async task class to get json by making HTTP call
+     * This gets the info of a specific make/model based on the spinner's selection
+     * @param
+     */
+    private class GetCarData extends AsyncTask<Void, Void, Void>{
+
+        @Override
+        protected void onPreExecute(){
+            super.onPreExecute();
+            // Showing progress dialog
+            pDialog = new ProgressDialog(carListActivity.this);
+            pDialog.setMessage("Fetching car data...");
+            pDialog.setCancelable(false);
+            pDialog.show();
+        }
+
+        @Override
+        protected Void doInBackground(Void... arg0){
+            HttpHandler sh = new HttpHandler();
+
+            // Have to get the make and model to create the URL to make the call
+            // Replacing the make and model number in the carUrl to make the correct search
+            carUrl = carUrl.replaceFirst(" ", carMakeNum);
+            carUrl = carUrl.replaceFirst(" ", carModelNum);
+            // appending the id to call the correct url
+            String jsonStrMake = sh.makeServicesCall(carUrl);
+
+            Log.e(TAG, "Response from url: " + jsonStrMake);
+            String newStr = jsonStrMake.substring(9, jsonStrMake.length() - 1);
+            System.out.println("Edited json:" + newStr);
+
+
+            // If we get a response from the url
+            if (jsonStrMake != null){
+                try{
+                    JSONArray cars = new JSONArray(newStr);
+
+
+                    // Looping through each model
+                    for (int i = 0; i < cars.length(); i++) {
+                        // Getting each individual object (each model)
+                        JSONObject temp = cars.getJSONObject(i);
+                        String carId = temp.getString("id");
+                        String price = temp.getString("price");
+                        String created = temp.getString("created_at");
+                        String description = temp.getString("veh_description");
+
+                        // Creating a temp HashMap for this entry
+                        HashMap<String, String> mEntry = new HashMap<>();
+                        mEntry.put("id", carId);
+                        mEntry.put("price", price);
+                        mEntry.put("created", created);
+                        mEntry.put("description", description);
+
+                        carInfoList.add(mEntry);
+                        System.out.println("Model Entry: " + mEntry);
+                    }
+                    System.out.println("CARINFOLIST: " + carInfoList);
+                    for (int i = 0; i < carInfoList.size(); i++){
+                        System.out.println("INDEX " + i + ": " + carInfoList.get(i));
+                    }
+
+                } catch (final JSONException e) {
+                    Log.e(TAG, "Json parsing error: " + e.getMessage());
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(),
+                                    "Json parsing error: " + e.getMessage(),
+                                    Toast.LENGTH_LONG)
+                                    .show();
+                        }
+                    });
+                }
+            }
+            else {
+                Log.e(TAG, "Couldn't get JSON from server");
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getApplicationContext(),
+                                "Couldn't get JSON from server. Check LogCat for possible errors!",
+                                Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+            // Dismiss the progress dialog
+            if (pDialog.isShowing()){
+                pDialog.dismiss();
+            }
+
+            View recyclerView = findViewById(R.id.car_list);
+            assert recyclerView != null;
+            ((RecyclerView) recyclerView).getAdapter().notifyDataSetChanged();
+
+        }
+
+    }
+
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(this, DummyContent.ITEMS, mTwoPane));
+        //recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(this, DummyContent.ITEMS, mTwoPane));
+        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(this, carInfoList, mTwoPane));
     }
 
     public static class SimpleItemRecyclerViewAdapter
             extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
 
         private final carListActivity mParentActivity;
-        private final List<DummyContent.DummyItem> mValues;
+        private final ArrayList<HashMap<String, String>> mValues;
         private final boolean mTwoPane;
         private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DummyContent.DummyItem item = (DummyContent.DummyItem) view.getTag();
+                //DummyContent.DummyItem item = (DummyContent.DummyItem) view.getTag();
+                ArrayList<HashMap<String, String>> item = (ArrayList<HashMap<String, String>>) view.getTag();
                 if (mTwoPane) {
                     Bundle arguments = new Bundle();
-                    arguments.putString(carDetailFragment.ARG_ITEM_ID, item.id);
+                    // ???
+                    arguments.putString(carDetailFragment.ARG_ITEM_ID, item.toString());
                     carDetailFragment fragment = new carDetailFragment();
                     fragment.setArguments(arguments);
                     mParentActivity.getSupportFragmentManager().beginTransaction()
@@ -467,7 +617,7 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
                 } else {
                     Context context = view.getContext();
                     Intent intent = new Intent(context, carDetailActivity.class);
-                    intent.putExtra(carDetailFragment.ARG_ITEM_ID, item.id);
+                    intent.putExtra(carDetailFragment.ARG_ITEM_ID, item);
 
                     context.startActivity(intent);
                 }
@@ -475,12 +625,14 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
         };
 
         SimpleItemRecyclerViewAdapter(carListActivity parent,
-                                      List<DummyContent.DummyItem> items,
+                                      ArrayList<HashMap<String, String>> items,
                                       boolean twoPane) {
             mValues = items;
             mParentActivity = parent;
             mTwoPane = twoPane;
         }
+
+
 
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -491,8 +643,8 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
 
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
-            holder.mIdView.setText(mValues.get(position).id);
-            holder.mContentView.setText(mValues.get(position).content);
+            holder.mIdView.setText(mValues.get(position).get("id"));
+            holder.mContentView.setText(mValues.get(position).get("price"));
 
             holder.itemView.setTag(mValues.get(position));
             holder.itemView.setOnClickListener(mOnClickListener);
