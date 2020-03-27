@@ -62,8 +62,8 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
     private String[] arrModels;
 
     // These will be set by the results of the spinners, default is first to show
-    private String carMakeNum = "-1";
-    private String carModelNum = "-1";
+    private String carMakeNum;
+    private String carModelNum;
 
     private ProgressDialog pDialog;
     // URL to get all of the car makes in JSON
@@ -164,9 +164,7 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
             // This forces the model to update
             lastSpinnerPositionModel = -1;
             Toast.makeText(adapterView.getContext(), "Selected: " + result, Toast.LENGTH_SHORT).show();
-            /*Depending on the result of the first spinner, updates the contents of the second
-            spinner to the models available of the make chosen (e.g. if Tesla is chosen in the
-            first spinner, Model X and Model S will be options in the second spinner*/
+
             // go through and find models with make_id of 10
 
             // Set makeID to the makeID of the car selected by result
@@ -181,11 +179,19 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
                 }
             }
             // Iterating through the models to get all models with the matched makeID
+            boolean firstSelected = false;
             for (HashMap a : carModelList){
                 if (a.get("makeID").toString().equals(carMakeNum)){
+                    // The first model we add to modelList will be our first in the selection, so
+                    // we update our modelNum to this number for quick searching with the data url
                     modelList.add(a.get("model").toString());
+                    if (!firstSelected){
+                        carModelNum = a.get("id").toString();
+                        firstSelected = true;
+                    }
                 }
             }
+
             System.out.println("MODEL LIST" + modelList);
             // Create the String[]:
             arrModels = new String[modelList.size()];
@@ -213,6 +219,8 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
             }
             String result = adapterView.getItemAtPosition(i).toString().trim();
             System.out.println("RESULT of Spinner 2: " + result);
+            Toast.makeText(adapterView.getContext(), "Selected: " + result, Toast.LENGTH_SHORT).show();
+
             lastSpinnerModel = result;
             modelList.clear();
             carInfoList.clear();
@@ -229,7 +237,9 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
 
         // On any change of spinner, need to get the new car data
         // Then show the available results in the recyclerview based on the selected make/model
-        new GetCarData().execute();
+        if (carMakeNum != null && carModelNum != null){
+            new GetCarData().execute();
+        }
         ((RecyclerView) recyclerView).getAdapter().notifyDataSetChanged();
     }
 
@@ -486,6 +496,10 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
         @Override
         protected void onPreExecute(){
             super.onPreExecute();
+            // Gets rid of any previous dialogs:
+            if (pDialog.isShowing()){
+                pDialog.dismiss();
+            }
             // Showing progress dialog
             pDialog = new ProgressDialog(carListActivity.this);
             pDialog.setMessage("Fetching car data...");
@@ -501,18 +515,23 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
             // Replacing the make and model number in the carUrl to make the correct search
             String baseUrl = "https://thawing-beach-68207.herokuapp.com/cars/";
             String zip = "92603";
-            String jsonStrMake = sh.makeServicesCall(baseUrl + carMakeNum + "/" + carModelNum + "/" + zip);
+            if (carMakeNum.equals("") && carModelNum.equals("")){
+                carMakeNum = "10";
+                carModelNum = "21";
+            }
+            carUrl = baseUrl + carMakeNum + "/" + carModelNum + "/" + zip;
+            String jsonStrMake = sh.makeServicesCall(carUrl);
             System.out.println("CAR URL: " + carUrl);
 
             Log.e(TAG, "Response from url: " + jsonStrMake);
-            String test = jsonStrMake.replaceAll("/", ".");
+            //String test = jsonStrMake.replaceAll("/", ".");
 
 
 
             // If we get a response from the url
             if (jsonStrMake != null){
                 try{
-                    JSONObject lists = new JSONObject(test);
+                    JSONObject lists = new JSONObject(jsonStrMake);
                     JSONArray cars = (JSONArray) lists.get("lists");
 
 
@@ -641,7 +660,7 @@ public class carListActivity extends AppCompatActivity implements OnItemSelected
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
             // Position/ID
-            holder.mIdView.setText(position + ": " + mValues.get(position).get("id"));
+            holder.mIdView.setText(position + 1 + ": " + mValues.get(position).get("id"));
             // Name
             holder.mContentView.setText(mValues.get(position).get("make") + " " + mValues.get(position).get("model"));
 
